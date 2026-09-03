@@ -1,0 +1,5 @@
+vidigi<2.0.0
+simpy
+sim_tools
+streamlit
+streamlit-dnd
