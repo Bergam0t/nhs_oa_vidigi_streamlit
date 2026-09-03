@@ -220,270 +220,153 @@ class Model:
         return self.logger.to_dataframe()
 
 
-class Trial:
-    def __init__(self, param):
-        self.param = param
-        self.list_of_simulation_replications = []
-        self.trial_mean_q_time_registration = pd.NA
-        self.trial_sd_q_time_registration = pd.NA
-        self.trial_perc_90_q_time_registration = pd.NA
-        self.trial_mean_q_time_nurse = pd.NA
-        self.trial_sd_q_time_nurse = pd.NA
-        self.trial_perc_90_q_time_nurse = pd.NA
-        self.trial_mean_q_time_specialist = pd.NA
-        self.trial_sd_q_time_specialist = pd.NA
-        self.trial_perc_90_q_time_specialist = pd.NA
-        self.ci_lower_q_time_registration = pd.NA
-        self.ci_upper_q_time_registration = pd.NA
-        self.se_q_time_registration = pd.NA
-        self.ci_lower_q_time_nurse = pd.NA
-        self.ci_upper_q_time_nurse = pd.NA
-        self.se_q_time_nurse = pd.NA
-        self.ci_lower_q_time_specialist = pd.NA
-        self.ci_upper_q_time_specialist = pd.NA
-        self.se_q_time_specialist = pd.NA
+# class Trial:
+#     def __init__(self, param):
+#         self.param = param
+#         self.list_of_simulation_replications = []
+#         self.trial_mean_q_time_registration = pd.NA
+#         self.trial_sd_q_time_registration = pd.NA
+#         self.trial_perc_90_q_time_registration = pd.NA
+#         self.trial_mean_q_time_nurse = pd.NA
+#         self.trial_sd_q_time_nurse = pd.NA
+#         self.trial_perc_90_q_time_nurse = pd.NA
+#         self.trial_mean_q_time_specialist = pd.NA
+#         self.trial_sd_q_time_specialist = pd.NA
+#         self.trial_perc_90_q_time_specialist = pd.NA
+#         self.ci_lower_q_time_registration = pd.NA
+#         self.ci_upper_q_time_registration = pd.NA
+#         self.se_q_time_registration = pd.NA
+#         self.ci_lower_q_time_nurse = pd.NA
+#         self.ci_upper_q_time_nurse = pd.NA
+#         self.se_q_time_nurse = pd.NA
+#         self.ci_lower_q_time_specialist = pd.NA
+#         self.ci_upper_q_time_specialist = pd.NA
+#         self.se_q_time_specialist = pd.NA
 
-        self.trial_logger = TrialLogger()
+#         self.trial_logger = TrialLogger()
 
-    def run_trial(self):
-        for replication_id in range(self.param.num_replications):
-            model_replication = Model(self.param, replication_id)
-            model_replication.run_model()
-            patient_df = model_replication.convert_entity_list_to_dataframe(
-                model_replication.list_of_patients
-            )
-            model_replication.calculate_run_results(patient_df)
-            self.list_of_simulation_replications.append(model_replication)
+#     def run_trial(self):
+#         for replication_id in range(self.param.num_replications):
+#             model_replication = Model(self.param, replication_id)
+#             model_replication.run_model()
+#             patient_df = model_replication.convert_entity_list_to_dataframe(
+#                 model_replication.list_of_patients
+#             )
+#             model_replication.calculate_run_results(patient_df)
+#             self.list_of_simulation_replications.append(model_replication)
 
-            self.trial_logger.add_log(model_replication.logger)
+#             self.trial_logger.add_log(model_replication.logger)
 
-    def calculate_trial_results(self):
-        self.replication_df = pd.DataFrame(
-            replication.__dict__ for replication in self.list_of_simulation_replications
-        )
+#     def calculate_trial_results(self):
+#         self.replication_df = pd.DataFrame(
+#             replication.__dict__ for replication in self.list_of_simulation_replications
+#         )
 
-        self.trial_mean_q_time_registration = self.replication_df[
-            "mean_q_time_registration"
-        ].mean()
-        self.trial_sd_q_time_registration = self.replication_df[
-            "mean_q_time_registration"
-        ].std()
-        self.trial_perc_90_q_time_registration = self.replication_df[
-            "mean_q_time_registration"
-        ].quantile(0.9)
+#         self.trial_mean_q_time_registration = self.replication_df[
+#             "mean_q_time_registration"
+#         ].mean()
+#         self.trial_sd_q_time_registration = self.replication_df[
+#             "mean_q_time_registration"
+#         ].std()
+#         self.trial_perc_90_q_time_registration = self.replication_df[
+#             "mean_q_time_registration"
+#         ].quantile(0.9)
 
-        self.trial_mean_q_time_nurse = self.replication_df["mean_q_time_nurse"].mean()
-        self.trial_sd_q_time_nurse = self.replication_df["mean_q_time_nurse"].std()
-        self.trial_perc_90_q_time_nurse = self.replication_df[
-            "mean_q_time_nurse"
-        ].quantile(0.9)
+#         self.trial_mean_q_time_nurse = self.replication_df["mean_q_time_nurse"].mean()
+#         self.trial_sd_q_time_nurse = self.replication_df["mean_q_time_nurse"].std()
+#         self.trial_perc_90_q_time_nurse = self.replication_df[
+#             "mean_q_time_nurse"
+#         ].quantile(0.9)
 
-        self.trial_mean_q_time_specialist = self.replication_df[
-            "mean_q_time_specialist"
-        ].mean()
-        self.trial_sd_q_time_specialist = self.replication_df[
-            "mean_q_time_specialist"
-        ].std()
-        self.trial_perc_90_q_time_specialist = self.replication_df[
-            "mean_q_time_specialist"
-        ].quantile(0.9)
+#         self.trial_mean_q_time_specialist = self.replication_df[
+#             "mean_q_time_specialist"
+#         ].mean()
+#         self.trial_sd_q_time_specialist = self.replication_df[
+#             "mean_q_time_specialist"
+#         ].std()
+#         self.trial_perc_90_q_time_specialist = self.replication_df[
+#             "mean_q_time_specialist"
+#         ].quantile(0.9)
 
-        self.se_q_time_registration = self.trial_sd_q_time_registration / math.sqrt(
-            self.param.num_replications
-        )
-        self.se_q_time_nurse = self.trial_sd_q_time_nurse / math.sqrt(
-            self.param.num_replications
-        )
+#         self.se_q_time_registration = self.trial_sd_q_time_registration / math.sqrt(
+#             self.param.num_replications
+#         )
+#         self.se_q_time_nurse = self.trial_sd_q_time_nurse / math.sqrt(
+#             self.param.num_replications
+#         )
 
-        self.se_q_time_specialist = self.trial_sd_q_time_specialist / math.sqrt(
-            self.param.num_replications
-        )
+#         self.se_q_time_specialist = self.trial_sd_q_time_specialist / math.sqrt(
+#             self.param.num_replications
+#         )
 
-        t = stats.t.ppf(0.975, df=self.param.num_replications - 1)
+#         t = stats.t.ppf(0.975, df=self.param.num_replications - 1)
 
-        self.ci_lower_q_time_registration = self.trial_mean_q_time_registration - (
-            t * self.se_q_time_registration
-        )
-        self.ci_upper_q_time_registration = self.trial_mean_q_time_registration + (
-            t * self.se_q_time_registration
-        )
+#         self.ci_lower_q_time_registration = self.trial_mean_q_time_registration - (
+#             t * self.se_q_time_registration
+#         )
+#         self.ci_upper_q_time_registration = self.trial_mean_q_time_registration + (
+#             t * self.se_q_time_registration
+#         )
 
-        self.ci_lower_q_time_nurse = self.trial_mean_q_time_nurse - (
-            t * self.se_q_time_nurse
-        )
-        self.ci_upper_q_time_nurse = self.trial_mean_q_time_nurse + (
-            t * self.se_q_time_nurse
-        )
+#         self.ci_lower_q_time_nurse = self.trial_mean_q_time_nurse - (
+#             t * self.se_q_time_nurse
+#         )
+#         self.ci_upper_q_time_nurse = self.trial_mean_q_time_nurse + (
+#             t * self.se_q_time_nurse
+#         )
 
-        self.ci_lower_q_time_specialist = self.trial_mean_q_time_specialist - (
-            t * self.se_q_time_specialist
-        )
-        self.ci_upper_q_time_specialist = self.trial_mean_q_time_specialist + (
-            t * self.se_q_time_specialist
-        )
-
-
-class Animation:
-    def __init__(self, event_log, params):
-        self.event_log = event_log
-        self.params = params
-
-        self.layout = create_event_position_df(
-            [
-                EventPosition(event="arrival", x=0, y=850, label="Entrance"),
-                EventPosition(
-                    event="receptionist_wait_begins",
-                    x=200,
-                    y=800,
-                    label="Waiting for Receptionist",
-                ),
-                EventPosition(
-                    event="being_seen_by_receptionist",
-                    x=200,
-                    y=700,
-                    label="Being Seen By Receptionist",
-                    resource="num_receptionists",
-                ),
-                EventPosition(
-                    event="nurse_wait_begins", x=200, y=550, label="Waiting for Nurse"
-                ),
-                EventPosition(
-                    event="being_seen_by_nurse",
-                    x=200,
-                    y=450,
-                    label="Being Seen By Nurse",
-                    resource="num_nurses",
-                ),
-                EventPosition(
-                    event="specialist_wait_begins",
-                    x=75,
-                    y=300,
-                    label="Waiting for Specialist",
-                ),
-                EventPosition(
-                    event="being_seen_by_specialist",
-                    x=75,
-                    y=200,
-                    label="Being Seen By Specialist",
-                    resource="num_specialists",
-                ),
-                EventPosition(event="depart", x=200, y=50, label="Exit"),
-            ]
-        )
-
-    def build_animation(self, time_interval=1):
-        return animate_activity_log(
-            event_log=self.event_log,
-            event_position_df=self.layout,
-            every_x_time_units=time_interval,
-            scenario=self.params,
-        )
+#         self.ci_lower_q_time_specialist = self.trial_mean_q_time_specialist - (
+#             t * self.se_q_time_specialist
+#         )
+#         self.ci_upper_q_time_specialist = self.trial_mean_q_time_specialist + (
+#             t * self.se_q_time_specialist
+#         )
 
 
-class ProcessMap:
-    def __init__(self, event_log, params):
-        self.event_log = event_log
-        self.params = params
-
-    def build_process_map(self, interactive=False):
-        # First, we take our event log and add a timestamp column to it, as it's required
-        # so that it can display average durations accurately
-        my_event_log_timestamp = add_sim_timestamp(
-            self.event_log, time_unit="minutes", sim_start="09:00:00"
-        ).copy()
-
-        # If we print this, we can see our new timestamp column
-        # print(my_event_log_timestamp.head(10))
-
-        # Now we'll discover the pathways in the model
-        nodes, edges = discover_dfg(my_event_log_timestamp)
-
-        if interactive:
-            # An an interactive version
-            cytoscape_widget = dfg_to_cytoscape(
-                nodes,
-                edges,
-                min_frequency=5,
-                spacing_factor=2,
-                width=1400,
-            )
-            display(cytoscape_widget)
-
-        else:
-            # Now we can create a static representation of flow through the process
-            graphviz_graph = dfg_to_graphviz(nodes, edges, min_frequency=5)
-            display(graphviz_graph)
+# base_case_params = Param()
+# base_case_model_run = Model(base_case_params, replication_id=1)
+# base_case_model_run.run_model()
 
 
-if __name__ == "__main__":
-    base_case_params = Param()
-    base_case_trial = Trial(base_case_params)
-    base_case_trial.run_trial()
-    base_case_trial.calculate_trial_results()
+# base_case_trial = Trial(base_case_params)
+# base_case_trial.run_trial()
+# base_case_trial.calculate_trial_results()
 
-    print("BASE CASE TRIAL RESULTS")
-    print("-----------------------")
-    print("Queuing Time for Registration")
-    print(f"Mean : {base_case_trial.trial_mean_q_time_registration:.2f} minutes")
-    print(f"SD : {base_case_trial.trial_sd_q_time_registration:.2f} minutes")
-    print(
-        f"90th Perc : {base_case_trial.trial_perc_90_q_time_registration:.2f}",
-        "minutes",
-    )
-    print(f"Standard Error : {base_case_trial.se_q_time_registration:.2f}")
-    print(
-        f"95% CI : ({base_case_trial.ci_lower_q_time_registration:.2f}, ",
-        f"{base_case_trial.ci_upper_q_time_registration:.2f}) minutes",
-    )
-    print()
+# class ProcessMap:
+#     def __init__(self, event_log, params):
+#         self.event_log = event_log
+#         self.params = params
 
-    print("Queuing Time for the Nurse")
-    print(f"Mean : {base_case_trial.trial_mean_q_time_nurse:.2f} minutes")
-    print(f"SD : {base_case_trial.trial_sd_q_time_nurse:.2f} minutes")
-    print(f"90th Perc : {base_case_trial.trial_perc_90_q_time_nurse:.2f} minutes")
-    print(f"Standard Error : {base_case_trial.se_q_time_nurse:.2f}")
-    print(
-        f"95% CI : ({base_case_trial.ci_lower_q_time_nurse:.2f}, ",
-        f"{base_case_trial.ci_upper_q_time_nurse:.2f}) minutes",
-    )
-    print()
+#     def build_process_map(self, interactive=False):
+#         # First, we take our event log and add a timestamp column to it, as it's required
+#         # so that it can display average durations accurately
+#         my_event_log_timestamp = add_sim_timestamp(
+#             self.event_log, time_unit="minutes", sim_start="09:00:00"
+#         ).copy()
 
-    print("Queuing Time for the Specialist")
-    print(f"Mean : {base_case_trial.trial_mean_q_time_specialist:.2f} minutes")
-    print(f"SD : {base_case_trial.trial_sd_q_time_specialist:.2f} minutes")
-    print(
-        f"90th Perc : {base_case_trial.trial_perc_90_q_time_specialist:.2f} ", "minutes"
-    )
-    print(f"Standard Error : {base_case_trial.se_q_time_specialist:.2f}")
-    print(
-        f"95% CI : ({base_case_trial.ci_lower_q_time_specialist:.2f}, ",
-        f"{base_case_trial.ci_upper_q_time_specialist:.2f}) minutes",
-    )
-    print()
+#         # If we print this, we can see our new timestamp column
+#         # print(my_event_log_timestamp.head(10))
 
-    # 1. Modify the code above and here so that animations work with the Trial class
-    # and generate a single animation to confirm it works
-    my_event_log = base_case_trial.trial_logger.get_log_by_run(run=0, as_df=True)
+#         # Now we'll discover the pathways in the model
+#         nodes, edges = discover_dfg(my_event_log_timestamp)
 
-    print(my_event_log.head(20))
+#         if interactive:
+#             # An an interactive version
+#             cytoscape_widget = dfg_to_cytoscape(
+#                 nodes,
+#                 edges,
+#                 min_frequency=5,
+#                 spacing_factor=2,
+#                 width=1400,
+#             )
+#             display(cytoscape_widget)
 
-    my_animation = Animation(my_event_log, base_case_params)
+#         else:
+#             # Now we can create a static representation of flow through the process
+#             graphviz_graph = dfg_to_graphviz(nodes, edges, min_frequency=5)
+#             display(graphviz_graph)
 
-    fig = my_animation.build_animation()
 
-    fig.show()
-
-    # 2. Generate an animation for each run of the model
-    for run in range(base_case_params.num_replications):
-        my_event_log = base_case_trial.trial_logger.get_log_by_run(run=run, as_df=True)
-        my_animation = Animation(my_event_log, base_case_params)
-        fig = my_animation.build_animation()
-        print(f"Run {run}")
-        fig.show()
-
-    # 3. Explore the EventLogger and TrialLogger visualisations
-
-    # 4. Generate a process map of this system
-    my_process_map = ProcessMap(my_event_log, base_case_params)
-    my_process_map.build_process_map(interactive=False)
-    my_process_map.build_process_map(interactive=True)
+# my_process_map = ProcessMap(my_event_log, base_case_params)
+# my_process_map.build_process_map(interactive=False)
+# my_process_map.build_process_map(interactive=True)

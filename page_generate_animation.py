@@ -1,5 +1,9 @@
 import streamlit as st
+from vidigi.utils import create_event_position_df, EventPosition
+from vidigi.animation import animate_activity_log
+from model import Param, Model  # , Trial
 
+st.set_page_config(layout="wide")
 
 st.subheader("Set Event Positions")
 
@@ -79,7 +83,7 @@ with st.expander("Click here to change the Event Positioning Dataframe"):
             persist_state="session",
         )
     with cold, st.container(border=True):
-        st.markdown("`waiting_for_nurse`")
+        st.markdown("`nurse_wait_begins`")
         nurse_wait_x = st.number_input(
             "x",
             key="nurse_wait_x_input",
@@ -103,7 +107,106 @@ with st.expander("Click here to change the Event Positioning Dataframe"):
             persist_state="session",
         )
 
-    st.code(f"""
+    cole, colf, colg, colh = st.columns(4)
+
+    with cole, st.container(border=True):
+        st.markdown("`being_seen_by_nurse`")
+        nurse_seen_x = st.number_input(
+            "x",
+            key="nurse_seen_x_input",
+            value=200,
+            min_value=0,
+            max_value=1000,
+            persist_state="session",
+        )
+        nurse_seen_y = st.number_input(
+            "y",
+            key="nurse_seen_y_input",
+            value=450,
+            min_value=0,
+            max_value=1000,
+            persist_state="session",
+        )
+        nurse_seen_label = st.text_input(
+            "Label",
+            key="nurse_seen_label_input",
+            value="Being Seen By Nurse",
+            persist_state="session",
+        )
+    with colf, st.container(border=True):
+        st.markdown("`specialist_wait_begins`")
+        specialist_wait_x = st.number_input(
+            "x",
+            key="specialist_wait_x_input",
+            value=75,
+            min_value=0,
+            max_value=1000,
+            persist_state="session",
+        )
+        specialist_wait_y = st.number_input(
+            "y",
+            key="specialist_wait_y_input",
+            value=300,
+            min_value=0,
+            max_value=1000,
+            persist_state="session",
+        )
+        specialist_wait_label = st.text_input(
+            "Label",
+            key="specialist_wait_label_input",
+            value="Waiting for Specialist",
+            persist_state="session",
+        )
+    with colg, st.container(border=True):
+        st.markdown("`being_seen_by_specialist`")
+        specialist_seen_x = st.number_input(
+            "x",
+            key="specialist_seen_x_input",
+            value=75,
+            min_value=0,
+            max_value=1000,
+            persist_state="session",
+        )
+        specialist_seen_y = st.number_input(
+            "y",
+            key="specialist_seen_y_input",
+            value=200,
+            min_value=0,
+            max_value=1000,
+            persist_state="session",
+        )
+        specialist_seen_label = st.text_input(
+            "Label",
+            key="specialist_seen_label_input",
+            value="Being Seen By Specialist",
+            persist_state="session",
+        )
+    with colh, st.container(border=True):
+        st.markdown("`depart`")
+        depart_x = st.number_input(
+            "x",
+            key="depart_x_input",
+            value=200,
+            min_value=0,
+            max_value=1000,
+            persist_state="session",
+        )
+        depart_y = st.number_input(
+            "y",
+            key="depart_y_input",
+            value=50,
+            min_value=0,
+            max_value=1000,
+            persist_state="session",
+        )
+        depart_label = st.text_input(
+            "Label",
+            key="depart_label_input",
+            value="Exit",
+            persist_state="session",
+        )
+
+    event_position_df_generated = f"""
 create_event_position_df(
     [
         EventPosition(
@@ -113,41 +216,265 @@ create_event_position_df(
             event="receptionist_wait_begins", x={receptionist_wait_x}, y={receptionist_wait_y}, label="{receptionist_wait_label}",
         ),
         EventPosition(
-            event="being_seen_by_receptionist", x={receptionist_seen_x}, y={receptionist_seen_y}, label="Being Seen By Receptionist", resource="num_receptionists",
+            event="being_seen_by_receptionist", x={receptionist_seen_x}, y={receptionist_seen_y}, label="{receptionist_seen_label}", resource="num_receptionists",
         ),
         EventPosition(
             event="nurse_wait_begins", x={nurse_wait_x}, y={nurse_wait_y}, label="{nurse_wait_label}"
         ),
         EventPosition(
-            event="being_seen_by_nurse",
-            x=200,
-            y=450,
-            label="Being Seen By Nurse",
-            resource="num_nurses",
+            event="being_seen_by_nurse", x={nurse_seen_x}, y={nurse_seen_y}, label="{nurse_seen_label}", resource="num_nurses",
         ),
         EventPosition(
-            event="specialist_wait_begins",
-            x=75,
-            y=300,
-            label="Waiting for Specialist",
+            event="specialist_wait_begins", x={specialist_wait_x}, y={specialist_wait_y}, label="{specialist_wait_label}",
         ),
         EventPosition(
-            event="being_seen_by_specialist",
-            x=75,
-            y=200,
-            label="Being Seen By Specialist",
-            resource="num_specialists",
+            event="being_seen_by_specialist", x={specialist_seen_x}, y={specialist_seen_y}, label="{specialist_seen_label}", resource="num_specialists",
         ),
-        EventPosition(event="depart", x=200, y=50, label="Exit"),
+        EventPosition(
+            event="depart", x={depart_x}, y={depart_y}, label="{depart_label}"
+        ),
     ]
 )
-    """)
+    """
+
+    st.code(event_position_df_generated)
 
 
-col1, col2, col3 = st.columns(3)
+with st.sidebar:
+    st.markdown("**Animation Parameters**")
+    time_interval_slider = st.slider(
+        "Time between snapshots",
+        value=1,
+        min_value=1,
+        max_value=10,
+        persist_state="session",
+        key="time_interval_input",
+    )
+    gap_between_entities_slider = st.slider(
+        "Gap between entities",
+        value=10,
+        min_value=1,
+        max_value=100,
+        persist_state="session",
+        key="gap_between_entities_input",
+    )
+    gap_between_queue_rows_slider = st.slider(
+        "Gap between queue rows",
+        value=40,
+        min_value=1,
+        max_value=100,
+        persist_state="session",
+        key="gap_between_queue_rows_input",
+    )
+    gap_between_resources_slider = st.slider(
+        "Gap between resources",
+        value=10,
+        min_value=1,
+        max_value=100,
+        persist_state="session",
+        key="gap_between_resources_input",
+    )
+    entity_icon_size_slider = st.slider(
+        "Entity Icon Size",
+        value=20,
+        min_value=1,
+        max_value=100,
+        persist_state="session",
+        key="entity_icon_size_input",
+    )
+    wrap_queues_at = st.slider(
+        "Wrap queues at",
+        value=10,
+        min_value=1,
+        max_value=30,
+        persist_state="session",
+        key="wrap_queues_input",
+    )
+
+    maximum_queue = st.slider(
+        "Maximum Queue Displayed",
+        value=10,
+        min_value=0,
+        max_value=100,
+        persist_state="session",
+        key="step_snapshot_max_input",
+        help="Best as a multiple of 'Wrap queues at!'",
+    )
+
+    st.markdown("**Simulation Parameters**")
+    iat_slider = st.slider(
+        "Interarrival Time (mins)",
+        value=2.0,
+        min_value=0.1,
+        max_value=30.0,
+        persist_state="session",
+        key="iat_input",
+        step=0.1,
+    )
+    num_recep_slider = st.slider(
+        "Number of Receptionists",
+        value=1,
+        min_value=1,
+        max_value=10,
+        persist_state="session",
+        key="num_recep_input",
+    )
+    num_nurses_slider = st.slider(
+        "Number of Nurses",
+        value=1,
+        min_value=1,
+        max_value=10,
+        persist_state="session",
+        key="num_nurses_input",
+    )
+
+    num_specialists_slider = st.slider(
+        "Number of Specialists",
+        value=1,
+        min_value=1,
+        max_value=10,
+        persist_state="session",
+        key="num_specialists_input",
+    )
 
 
-button_run_pressed = st.button("Run simulation")
+class Animation:
+    def __init__(self, event_log, params):
+        self.event_log = event_log
+        self.params = params
 
-if button_run_pressed:
-    pass
+        self.layout = create_event_position_df(
+            [
+                EventPosition(
+                    event="arrival",
+                    x=arrival_x,
+                    y=arrival_y,
+                    label=arrival_label,
+                ),
+                EventPosition(
+                    event="receptionist_wait_begins",
+                    x=receptionist_wait_x,
+                    y=receptionist_wait_y,
+                    label=receptionist_wait_label,
+                ),
+                EventPosition(
+                    event="being_seen_by_receptionist",
+                    x=receptionist_seen_x,
+                    y=receptionist_seen_y,
+                    label=receptionist_seen_label,
+                    resource="num_receptionists",
+                ),
+                EventPosition(
+                    event="nurse_wait_begins",
+                    x=nurse_wait_x,
+                    y=nurse_wait_y,
+                    label=nurse_wait_label,
+                ),
+                EventPosition(
+                    event="being_seen_by_nurse",
+                    x=nurse_seen_x,
+                    y=nurse_seen_y,
+                    label=nurse_seen_label,
+                    resource="num_nurses",
+                ),
+                EventPosition(
+                    event="specialist_wait_begins",
+                    x=specialist_wait_x,
+                    y=specialist_wait_y,
+                    label=specialist_wait_label,
+                ),
+                EventPosition(
+                    event="being_seen_by_specialist",
+                    x=specialist_seen_x,
+                    y=specialist_seen_y,
+                    label=specialist_seen_label,
+                    resource="num_specialists",
+                ),
+                EventPosition(
+                    event="depart", x=depart_x, y=depart_y, label=depart_label
+                ),
+            ]
+        )
+
+    def build_animation(self, time_interval=1):
+        return animate_activity_log(
+            event_log=self.event_log,
+            event_position_df=self.layout,
+            every_x_time_units=time_interval,
+            scenario=self.params,
+            gap_between_entities=gap_between_entities_slider,
+            step_snapshot_max=maximum_queue,
+            gap_between_resources=gap_between_resources_slider,
+            plotly_height=500,
+            entity_icon_size=entity_icon_size_slider,
+            gap_between_queue_rows=gap_between_queue_rows_slider,
+            wrap_queues_at=wrap_queues_at,
+        )
+
+
+col_params, col_anim = st.columns([0.35, 0.65])
+
+with col_params:
+    st.code(f"""
+what_if_params = Param(
+    num_nurses={num_nurses_slider},
+    num_receptionists={num_recep_slider},
+    num_specialists={num_specialists_slider},
+    mean_patient_inter={iat_slider},
+    mean_nurse_consult_time=10,
+    sd_nurse_consult_time=4,
+)
+""")
+
+with col_anim:
+    st.code(f"""
+class Animation:
+    def __init__(self, event_log, params):
+        self.event_log = event_log
+        self.params = params
+        self.layout = create_event_position_df(...)
+
+    def build_animation(self):
+        animate_activity_log(
+            event_log=self.event_log, scenario=self.params,
+            event_position_df=self.layout, plotly_height=500,
+            every_x_time_units={time_interval_slider},
+            entity_icon_size={entity_icon_size_slider}, gap_between_entities={gap_between_entities_slider},
+             wrap_queues_at={wrap_queues_at}, step_snapshot_max={maximum_queue},
+            gap_between_resources={gap_between_resources_slider}, gap_between_queue_rows={gap_between_queue_rows_slider},
+        )
+""")
+
+
+@st.fragment
+def render_anim():
+    button_run_pressed = st.button("Animate simulation")
+
+    if button_run_pressed:
+        # base_case_params = Param()
+        # base_case_trial = Trial(base_case_params)
+        # base_case_trial.run_trial()
+        # base_case_trial.calculate_trial_results()
+        # my_event_log = base_case_trial.trial_logger.get_log_by_run(run=0, as_df=True)
+
+        base_case_params = Param(
+            num_nurses=num_nurses_slider,
+            num_receptionists=num_recep_slider,
+            num_specialists=num_specialists_slider,
+            mean_patient_inter=iat_slider,
+            mean_nurse_consult_time=10,
+            sd_nurse_consult_time=4,
+        )
+
+        base_case_model_run = Model(base_case_params, replication_id=1)
+        base_case_model_run.run_model()
+        my_event_log = base_case_model_run.get_vidigi_event_log()
+
+        my_animation = Animation(my_event_log, base_case_params)
+
+        fig = my_animation.build_animation()
+
+        return st.plotly_chart(fig)
+
+
+render_anim()

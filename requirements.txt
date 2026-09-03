@@ -3,3 +3,4 @@ simpy
 sim_tools
 streamlit
 streamlit-dnd
+ipykernel
