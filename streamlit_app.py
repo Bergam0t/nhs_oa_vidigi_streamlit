@@ -9,12 +9,9 @@ st.html(
     """
     <style>
     /* ---- Banner across the top navigation bar ---- */
-    /* The app header sits to the right of the sidebar; the sidebar header
-       covers the top-left corner. Give both the same banner slice, sized to
-       the viewport width and anchored the same way, so they line up into one
-       continuous full-width strip. */
-    header[data-testid="stHeader"],
-    [data-testid="stSidebarHeader"] {
+    /* Sized to the viewport width so it spans the content area; the sidebar
+       keeps its plain header. */
+    header[data-testid="stHeader"] {
         height: 5rem;
         background-image:
             linear-gradient(rgba(0, 0, 0, 0.38), rgba(0, 0, 0, 0.38)),
@@ -22,12 +19,6 @@ st.html(
         background-size: 100vw auto;
         background-position: left center;
         background-repeat: no-repeat;
-    }
-
-    /* The sidebar collapse chevron now sits on the banner. */
-    [data-testid="stSidebarCollapseButton"] svg {
-        color: #ffffff !important;
-        fill: #ffffff !important;
     }
 
     /* Keep the page tabs and menu readable on top of the banner. */
@@ -47,6 +38,13 @@ st.html(
     header[data-testid="stHeader"] a[data-testid="stTopNavLink"][aria-current="page"] {
         background: rgba(255, 255, 255, 0.26);
         font-weight: 700;
+    }
+
+    /* ---- Trim the empty space at the top of the sidebar ---- */
+    /* This strip only holds the collapse chevron; shrink it and its margin. */
+    section[data-testid="stSidebar"] [data-testid="stSidebarHeader"] {
+        height: 2.5rem;
+        margin-bottom: 0.25rem;
     }
     </style>
     """
