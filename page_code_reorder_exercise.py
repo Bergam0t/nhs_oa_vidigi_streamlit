@@ -1,7 +1,7 @@
 import streamlit as st
 from streamlit_dnd import dnd, apply_move
 
-st.set_page_config(layout="wide")
+# Page config and the top-banner styling live in streamlit_app.py (the entrypoint).
 
 st.title("Vidigi Logging Code")
 

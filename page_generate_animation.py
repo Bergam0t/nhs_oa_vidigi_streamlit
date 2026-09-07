@@ -3,7 +3,34 @@ from vidigi.utils import create_event_position_df, EventPosition
 from vidigi.animation import animate_activity_log
 from model import Param, Model  # , Trial
 
-st.set_page_config(layout="wide")
+# Page config and the top-banner styling live in streamlit_app.py (the entrypoint).
+
+st.html(
+    """
+    <style>
+    /* ---- Tighten the sliders in the sidebar ---- */
+
+    /* Less space between each widget in the sidebar. */
+    section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+        gap: 0.5rem;
+    }
+
+    /* Trim the large vertical padding baked into every slider. Keep enough
+       headroom above for the always-visible value, but drop the dead space
+       below the track. */
+    section[data-testid="stSidebar"] [data-testid="stSlider"] > div:last-child > div {
+        padding-top: 1.35rem !important;
+        padding-bottom: 0.1rem !important;
+    }
+
+    /* Pull each slider a little closer to its label (but leave room for the
+       value that sits just above the track). */
+    section[data-testid="stSidebar"] [data-testid="stWidgetLabel"] {
+        margin-bottom: 0.35rem;
+    }
+    </style>
+    """
+)
 
 st.title("Animation Playground")
 
