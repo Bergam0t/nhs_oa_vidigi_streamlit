@@ -7,6 +7,9 @@ from vidigi.utils import create_event_position_df, EventPosition
 from vidigi.animation import animate_activity_log
 from model import Param, Model  # , Trial
 
+with open("styles.css") as css:
+    st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
+
 # Page config and the top-banner styling live in streamlit_app.py (the entrypoint).
 
 _TOKEN_CHARS = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.")

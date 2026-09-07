@@ -3,3 +3,6 @@
 # in streamlit_app.py.
 [server]
 enableStaticServing = true
+
+[theme]
+base="light"

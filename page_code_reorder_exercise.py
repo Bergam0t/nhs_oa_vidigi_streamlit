@@ -3,6 +3,9 @@ import random
 import streamlit as st
 from streamlit_dnd import dnd, apply_move
 
+with open("styles.css") as css:
+    st.markdown(f"<style>{css.read()}</style>", unsafe_allow_html=True)
+
 # Page config and the top-banner styling live in streamlit_app.py (the entrypoint).
 
 st.title("Vidigi Logging Code")
@@ -250,7 +253,9 @@ if button_submit_pressed:
     elif len(left) != len(SNIPPET_ID) or {
         SNIPPET_ID.get(_norm(x)) for x in left
     } != set(SNIPPET_ID.values()):
-        st.error("Something's off with the snippets -- hit 'Reset / shuffle again' and try once more.")
+        st.error(
+            "Something's off with the snippets -- hit 'Reset / shuffle again' and try once more."
+        )
     else:
         pos = {SNIPPET_ID[_norm(x)]: idx for idx, x in enumerate(left)}
         breach = next(

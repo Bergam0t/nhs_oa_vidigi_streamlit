@@ -8,13 +8,13 @@ from vidigi.logging import EventLogger, TrialLogger
 from vidigi.utils import create_event_position_df, EventPosition
 from vidigi.animation import animate_activity_log
 from vidigi.resources import VidigiStore
-from vidigi.process_mapping import (
-    add_sim_timestamp,
-    discover_dfg,
-    dfg_to_graphviz,
-    dfg_to_cytoscape,
-)
-from IPython.display import display
+# from vidigi.process_mapping import (
+#     add_sim_timestamp,
+#     discover_dfg,
+#     dfg_to_graphviz,
+#     dfg_to_cytoscape,
+# )
+# from IPython.display import display
 
 
 class Patient:

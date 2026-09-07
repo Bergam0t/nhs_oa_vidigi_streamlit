@@ -17,6 +17,7 @@ pack(
         "streamlit_dnd/frontend/index.html",
         "streamlit_dnd/frontend/main.js",
         "streamlit_dnd/frontend/streamlit-protocol.js",
+        "styles.css",
     ],
     run_preview_server=True,
     requirements=[
