@@ -12,21 +12,43 @@ st.html(
 
     /* Less space between each widget in the sidebar. */
     section[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
-        gap: 0.5rem;
+        gap: 0.6rem;
     }
 
     /* Trim the large vertical padding baked into every slider. Keep enough
-       headroom above for the always-visible value, but drop the dead space
-       below the track. */
+       headroom above for the always-visible value, and enough below the track
+       for the min/max range labels that appear on hover. */
     section[data-testid="stSidebar"] [data-testid="stSlider"] > div:last-child > div {
         padding-top: 1.35rem !important;
-        padding-bottom: 0.1rem !important;
+        padding-bottom: 0.7rem !important;
     }
 
     /* Pull each slider a little closer to its label (but leave room for the
        value that sits just above the track). */
     section[data-testid="stSidebar"] [data-testid="stWidgetLabel"] {
         margin-bottom: 0.35rem;
+    }
+
+    /* Tighten the gap above and below the divider between the two groups. */
+    section[data-testid="stSidebar"] hr {
+        margin-top: 0.8rem;
+        margin-bottom: 0.8rem;
+    }
+
+    /* ---- Big call-to-action button on the "Run" tab ---- */
+    .st-key-animate_button button {
+        min-height: 3.5rem;
+        font-size: 1.15rem;
+        font-weight: 600;
+        background-color: #be185d;
+        border-color: #be185d;
+        color: #ffffff;
+    }
+    .st-key-animate_button button:hover,
+    .st-key-animate_button button:focus:not(:active) {
+        background-color: #9d174d;
+        border-color: #9d174d;
+        color: #ffffff;
     }
     </style>
     """
@@ -37,12 +59,6 @@ st.title("Animation Playground")
 st.write(
     "Let's now generate the animation. This page gives you a chance to try out a range of key vidigi parameters, interactively building up the code for an animation."
 )
-
-st.subheader("Set Simulation and Animation Parameters")
-
-st.caption("""
-Use the sliders in the sidebar to adjust the simulation parameters (which will affect your `Param` class) and the animation parameters (which will affect your `Animation` class). See how the code below updates as you make your changes.
-""")
 
 with st.sidebar:
     st.markdown("**Animation Parameters**")
@@ -144,246 +160,219 @@ with st.sidebar:
     )
 
 
-col_params, col_anim = st.columns([0.35, 0.65])
+tab_build, tab_run = st.tabs(["Build your animation", "Run the animation"])
 
-with col_params:
-    st.code(f"""
-what_if_params = Param(
-    num_nurses={num_nurses_slider},
-    num_receptionists={num_recep_slider},
-    num_specialists={num_specialists_slider},
-    mean_patient_inter={iat_slider},
-    mean_nurse_consult_time=10,
-    sd_nurse_consult_time=4,
-)
+with tab_build:
+    st.caption("""
+Use the sliders in the sidebar to set the simulation parameters (which feed your `Param` class) and the animation parameters (which feed your `Animation` class). Optionally adjust where each event sits on screen below. The assembled code updates as you make your changes.
 """)
 
-with col_anim:
-    st.code(f"""
-class Animation:
-    def __init__(self, event_log, params):
-        self.event_log = event_log
-        self.params = params
-        self.layout = create_event_position_df(...)
+    st.subheader("ADVANCED: Adjust Event Positions")
 
-    def build_animation(self):
-        animate_activity_log(
-            event_log=self.event_log, scenario=self.params,
-            event_position_df=self.layout, plotly_height=500,
-            every_x_time_units={time_interval_slider},
-            entity_icon_size={entity_icon_size_slider}, gap_between_entities={gap_between_entities_slider},
-             wrap_queues_at={wrap_queues_at}, step_snapshot_max={maximum_queue},
-            gap_between_resources={gap_between_resources_slider}, gap_between_queue_rows={gap_between_queue_rows_slider},
-        )
-""")
+    st.caption(
+        "Want to try changing where each event appears on the screen? You can make those changes here."
+    )
 
+    with st.expander("Click here to change the Event Positioning Dataframe"):
+        cola, colb, colc, cold = st.columns(4)
 
-st.subheader("ADVANCED: Adjust Event Positions")
+        with cola, st.container(border=True):
+            st.markdown("`arrival`")
+            arrival_x = st.number_input(
+                "x",
+                key="arrival_x_input",
+                value=0,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            arrival_y = st.number_input(
+                "y",
+                key="arrival_y_input",
+                value=850,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            arrival_label = st.text_input(
+                "Label",
+                key="arrival_label_input",
+                value="Entrance",
+                persist_state="session",
+            )
+        with colb, st.container(border=True):
+            st.markdown("`receptionist_wait_begins`")
+            receptionist_wait_x = st.number_input(
+                "x",
+                key="receptionist_wait_x_input",
+                value=200,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            receptionist_wait_y = st.number_input(
+                "y",
+                key="receptionist_wait_y_input",
+                value=800,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            receptionist_wait_label = st.text_input(
+                "Label",
+                key="receptionist_label_input",
+                value="Waiting for Receptionist",
+                persist_state="session",
+            )
+        with colc, st.container(border=True):
+            st.markdown("`being_seen_by_receptionist`")
+            receptionist_seen_x = st.number_input(
+                "x",
+                key="receptionist_seen_x_input",
+                value=200,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            receptionist_seen_y = st.number_input(
+                "y",
+                key="receptionist_seen_y_input",
+                value=700,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            receptionist_seen_label = st.text_input(
+                "Label",
+                key="receptionist_seen_input",
+                value="Being Seen by Receptionist",
+                persist_state="session",
+            )
+        with cold, st.container(border=True):
+            st.markdown("`nurse_wait_begins`")
+            nurse_wait_x = st.number_input(
+                "x",
+                key="nurse_wait_x_input",
+                value=200,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            nurse_wait_y = st.number_input(
+                "y",
+                key="nurse_wait_y_input",
+                value=550,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            nurse_wait_label = st.text_input(
+                "Label",
+                key="nurse_wait_label_input",
+                value="Waiting for Nurse",
+                persist_state="session",
+            )
 
-st.caption(
-    "Want to try changing where each event appears on the screen? You can make those changes here."
-)
+        cole, colf, colg, colh = st.columns(4)
 
-with st.expander("Click here to change the Event Positioning Dataframe"):
-    cola, colb, colc, cold = st.columns(4)
+        with cole, st.container(border=True):
+            st.markdown("`being_seen_by_nurse`")
+            nurse_seen_x = st.number_input(
+                "x",
+                key="nurse_seen_x_input",
+                value=200,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            nurse_seen_y = st.number_input(
+                "y",
+                key="nurse_seen_y_input",
+                value=450,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            nurse_seen_label = st.text_input(
+                "Label",
+                key="nurse_seen_label_input",
+                value="Being Seen By Nurse",
+                persist_state="session",
+            )
+        with colf, st.container(border=True):
+            st.markdown("`specialist_wait_begins`")
+            specialist_wait_x = st.number_input(
+                "x",
+                key="specialist_wait_x_input",
+                value=75,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            specialist_wait_y = st.number_input(
+                "y",
+                key="specialist_wait_y_input",
+                value=300,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            specialist_wait_label = st.text_input(
+                "Label",
+                key="specialist_wait_label_input",
+                value="Waiting for Specialist",
+                persist_state="session",
+            )
+        with colg, st.container(border=True):
+            st.markdown("`being_seen_by_specialist`")
+            specialist_seen_x = st.number_input(
+                "x",
+                key="specialist_seen_x_input",
+                value=75,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            specialist_seen_y = st.number_input(
+                "y",
+                key="specialist_seen_y_input",
+                value=200,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            specialist_seen_label = st.text_input(
+                "Label",
+                key="specialist_seen_label_input",
+                value="Being Seen By Specialist",
+                persist_state="session",
+            )
+        with colh, st.container(border=True):
+            st.markdown("`depart`")
+            depart_x = st.number_input(
+                "x",
+                key="depart_x_input",
+                value=200,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            depart_y = st.number_input(
+                "y",
+                key="depart_y_input",
+                value=50,
+                min_value=0,
+                max_value=1000,
+                persist_state="session",
+            )
+            depart_label = st.text_input(
+                "Label",
+                key="depart_label_input",
+                value="Exit",
+                persist_state="session",
+            )
 
-    with cola, st.container(border=True):
-        st.markdown("`arrival`")
-        arrival_x = st.number_input(
-            "x",
-            key="arrival_x_input",
-            value=0,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        arrival_y = st.number_input(
-            "y",
-            key="arrival_y_input",
-            value=850,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        arrival_label = st.text_input(
-            "Label",
-            key="arrival_label_input",
-            value="Entrance",
-            persist_state="session",
-        )
-    with colb, st.container(border=True):
-        st.markdown("`receptionist_wait_begins`")
-        receptionist_wait_x = st.number_input(
-            "x",
-            key="receptionist_wait_x_input",
-            value=200,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        receptionist_wait_y = st.number_input(
-            "y",
-            key="receptionist_wait_y_input",
-            value=800,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        receptionist_wait_label = st.text_input(
-            "Label",
-            key="receptionist_label_input",
-            value="Waiting for Receptionist",
-            persist_state="session",
-        )
-    with colc, st.container(border=True):
-        st.markdown("`being_seen_by_receptionist`")
-        receptionist_seen_x = st.number_input(
-            "x",
-            key="receptionist_seen_x_input",
-            value=200,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        receptionist_seen_y = st.number_input(
-            "y",
-            key="receptionist_seen_y_input",
-            value=700,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        receptionist_seen_label = st.text_input(
-            "Label",
-            key="receptionist_seen_input",
-            value="Being Seen by Receptionist",
-            persist_state="session",
-        )
-    with cold, st.container(border=True):
-        st.markdown("`nurse_wait_begins`")
-        nurse_wait_x = st.number_input(
-            "x",
-            key="nurse_wait_x_input",
-            value=200,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        nurse_wait_y = st.number_input(
-            "y",
-            key="nurse_wait_y_input",
-            value=550,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        nurse_wait_label = st.text_input(
-            "Label",
-            key="nurse_wait_label_input",
-            value="Waiting for Nurse",
-            persist_state="session",
-        )
-
-    cole, colf, colg, colh = st.columns(4)
-
-    with cole, st.container(border=True):
-        st.markdown("`being_seen_by_nurse`")
-        nurse_seen_x = st.number_input(
-            "x",
-            key="nurse_seen_x_input",
-            value=200,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        nurse_seen_y = st.number_input(
-            "y",
-            key="nurse_seen_y_input",
-            value=450,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        nurse_seen_label = st.text_input(
-            "Label",
-            key="nurse_seen_label_input",
-            value="Being Seen By Nurse",
-            persist_state="session",
-        )
-    with colf, st.container(border=True):
-        st.markdown("`specialist_wait_begins`")
-        specialist_wait_x = st.number_input(
-            "x",
-            key="specialist_wait_x_input",
-            value=75,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        specialist_wait_y = st.number_input(
-            "y",
-            key="specialist_wait_y_input",
-            value=300,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        specialist_wait_label = st.text_input(
-            "Label",
-            key="specialist_wait_label_input",
-            value="Waiting for Specialist",
-            persist_state="session",
-        )
-    with colg, st.container(border=True):
-        st.markdown("`being_seen_by_specialist`")
-        specialist_seen_x = st.number_input(
-            "x",
-            key="specialist_seen_x_input",
-            value=75,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        specialist_seen_y = st.number_input(
-            "y",
-            key="specialist_seen_y_input",
-            value=200,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        specialist_seen_label = st.text_input(
-            "Label",
-            key="specialist_seen_label_input",
-            value="Being Seen By Specialist",
-            persist_state="session",
-        )
-    with colh, st.container(border=True):
-        st.markdown("`depart`")
-        depart_x = st.number_input(
-            "x",
-            key="depart_x_input",
-            value=200,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        depart_y = st.number_input(
-            "y",
-            key="depart_y_input",
-            value=50,
-            min_value=0,
-            max_value=1000,
-            persist_state="session",
-        )
-        depart_label = st.text_input(
-            "Label",
-            key="depart_label_input",
-            value="Exit",
-            persist_state="session",
-        )
-
-    event_position_df_generated = f"""
+        event_position_df_generated = f"""
 create_event_position_df(
     [
         EventPosition(
@@ -414,7 +403,42 @@ create_event_position_df(
 )
     """
 
-    st.code(event_position_df_generated)
+        st.code(event_position_df_generated)
+
+    st.subheader("Your code so far")
+
+    col_params, col_anim = st.columns([0.35, 0.65])
+
+    with col_params:
+        st.code(f"""
+what_if_params = Param(
+    num_nurses={num_nurses_slider},
+    num_receptionists={num_recep_slider},
+    num_specialists={num_specialists_slider},
+    mean_patient_inter={iat_slider},
+    mean_nurse_consult_time=10,
+    sd_nurse_consult_time=4,
+)
+""")
+
+    with col_anim:
+        st.code(f"""
+class Animation:
+    def __init__(self, event_log, params):
+        self.event_log = event_log
+        self.params = params
+        self.layout = create_event_position_df(...)
+
+    def build_animation(self):
+        animate_activity_log(
+            event_log=self.event_log, scenario=self.params,
+            event_position_df=self.layout, plotly_height=500,
+            every_x_time_units={time_interval_slider},
+            entity_icon_size={entity_icon_size_slider}, gap_between_entities={gap_between_entities_slider},
+             wrap_queues_at={wrap_queues_at}, step_snapshot_max={maximum_queue},
+            gap_between_resources={gap_between_resources_slider}, gap_between_queue_rows={gap_between_queue_rows_slider},
+        )
+""")
 
 
 class Animation:
@@ -491,14 +515,15 @@ class Animation:
         )
 
 
-st.write("""
-Finished tweaking the settings? Click the "Animate Simulation" button below to see how the changes you've made affect the final animation. You can rerun this as many times as you like!
-""")
-
-
 @st.fragment
 def render_anim():
-    button_run_pressed = st.button("Animate simulation")
+    button_run_pressed = st.button(
+        "Animate simulation",
+        key="animate_button",
+        type="primary",
+        icon=":material/play_arrow:",
+        width="stretch",
+    )
 
     if button_run_pressed:
         # base_case_params = Param()
@@ -507,24 +532,30 @@ def render_anim():
         # base_case_trial.calculate_trial_results()
         # my_event_log = base_case_trial.trial_logger.get_log_by_run(run=0, as_df=True)
 
-        base_case_params = Param(
-            num_nurses=num_nurses_slider,
-            num_receptionists=num_recep_slider,
-            num_specialists=num_specialists_slider,
-            mean_patient_inter=iat_slider,
-            mean_nurse_consult_time=10,
-            sd_nurse_consult_time=4,
-        )
+        with st.spinner("Running the simulation and building the animation..."):
+            base_case_params = Param(
+                num_nurses=num_nurses_slider,
+                num_receptionists=num_recep_slider,
+                num_specialists=num_specialists_slider,
+                mean_patient_inter=iat_slider,
+                mean_nurse_consult_time=10,
+                sd_nurse_consult_time=4,
+            )
 
-        base_case_model_run = Model(base_case_params, replication_id=1)
-        base_case_model_run.run_model()
-        my_event_log = base_case_model_run.get_vidigi_event_log()
+            base_case_model_run = Model(base_case_params, replication_id=1)
+            base_case_model_run.run_model()
+            my_event_log = base_case_model_run.get_vidigi_event_log()
 
-        my_animation = Animation(my_event_log, base_case_params)
+            my_animation = Animation(my_event_log, base_case_params)
 
-        fig = my_animation.build_animation()
+            fig = my_animation.build_animation()
 
-        return st.plotly_chart(fig)
+        st.plotly_chart(fig)
 
 
-render_anim()
+with tab_run:
+    st.write("""
+Finished tweaking the settings? Click the button to see how the changes you've made affect the final animation. You can rerun this as many times as you like!
+""")
+
+    render_anim()
