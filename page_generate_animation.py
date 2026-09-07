@@ -1,9 +1,44 @@
+import hashlib
+
 import streamlit as st
 from vidigi.utils import create_event_position_df, EventPosition
 from vidigi.animation import animate_activity_log
 from model import Param, Model  # , Trial
 
 # Page config and the top-banner styling live in streamlit_app.py (the entrypoint).
+
+
+def flash_on_change(container_key: str, code_text: str) -> None:
+    """Briefly highlight the container ``.st-key-<container_key>`` whenever
+    ``code_text`` differs from the previous run.
+
+    Slider changes trigger a full rerun, so the code blocks re-render every
+    time. The trick: this ships a ``<script>`` whose text only changes when the
+    code changes, so Streamlit re-executes it (and replays the CSS flash)
+    exactly on those reruns -- never on an unrelated rerun, and never on the
+    first render.
+    """
+    nonce = hashlib.md5(code_text.encode("utf-8")).hexdigest()[:8]
+    st.html(
+        f"""
+        <script>
+        (function () {{
+            const KEY = "{container_key}";
+            const NONCE = "{nonce}";  /* changes only when this code changes */
+            window.__codeFlash = window.__codeFlash || {{}};
+            const prev = window.__codeFlash[KEY];
+            window.__codeFlash[KEY] = NONCE;
+            if (prev === undefined || prev === NONCE) return;  /* first sight / no change */
+            const el = document.querySelector(".st-key-" + KEY);
+            if (!el) return;
+            el.classList.remove("code-flash");
+            void el.offsetWidth;  /* reflow so the animation can restart */
+            el.classList.add("code-flash");
+        }})();
+        </script>
+        """,
+        unsafe_allow_javascript=True,
+    )
 
 st.html(
     """
@@ -49,6 +84,37 @@ st.html(
         background-color: #9d174d;
         border-color: #9d174d;
         color: #ffffff;
+    }
+
+    /* ---- Let the ADVANCED section recede until you engage with it ---- */
+    .st-key-advanced_section {
+        opacity: 0.5;
+        transition: opacity 200ms ease;
+    }
+    .st-key-advanced_section:hover,
+    .st-key-advanced_section:focus-within {
+        opacity: 1;
+    }
+    .st-key-advanced_section h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        padding-bottom: 0.25rem;
+    }
+
+    /* ---- Flash a code block when the slider-driven code changes ---- */
+    @keyframes codeFlash {
+        from { box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.55); }
+        to   { box-shadow: 0 0 0 3px rgba(190, 24, 93, 0); }
+    }
+    .st-key-code_params.code-flash,
+    .st-key-code_anim.code-flash {
+        animation: codeFlash 0.8s ease-out;
+        border-radius: 0.5rem;
+    }
+
+    /* The flash helper and the style block above ship as empty html elements. */
+    [data-testid="stHtml"] {
+        display: none;
     }
     </style>
     """
@@ -167,13 +233,13 @@ with tab_build:
 Use the sliders in the sidebar to set the simulation parameters (which feed your `Param` class) and the animation parameters (which feed your `Animation` class). Optionally adjust where each event sits on screen below. The assembled code updates as you make your changes.
 """)
 
-    st.subheader("ADVANCED: Adjust Event Positions")
-
-    st.caption(
+    advanced = st.container(key="advanced_section")
+    advanced.subheader("ADVANCED: Adjust Event Positions")
+    advanced.caption(
         "Want to try changing where each event appears on the screen? You can make those changes here."
     )
 
-    with st.expander("Click here to change the Event Positioning Dataframe"):
+    with advanced.expander("Click here to change the Event Positioning Dataframe"):
         cola, colb, colc, cold = st.columns(4)
 
         with cola, st.container(border=True):
@@ -407,10 +473,7 @@ create_event_position_df(
 
     st.subheader("Your code so far")
 
-    col_params, col_anim = st.columns([0.35, 0.65])
-
-    with col_params:
-        st.code(f"""
+    params_code = f"""
 what_if_params = Param(
     num_nurses={num_nurses_slider},
     num_receptionists={num_recep_slider},
@@ -419,10 +482,9 @@ what_if_params = Param(
     mean_nurse_consult_time=10,
     sd_nurse_consult_time=4,
 )
-""")
+"""
 
-    with col_anim:
-        st.code(f"""
+    anim_code = f"""
 class Animation:
     def __init__(self, event_log, params):
         self.event_log = event_log
@@ -438,7 +500,19 @@ class Animation:
              wrap_queues_at={wrap_queues_at}, step_snapshot_max={maximum_queue},
             gap_between_resources={gap_between_resources_slider}, gap_between_queue_rows={gap_between_queue_rows_slider},
         )
-""")
+"""
+
+    col_params, col_anim = st.columns([0.35, 0.65])
+
+    with col_params, st.container(key="code_params"):
+        st.code(params_code)
+
+    with col_anim, st.container(key="code_anim"):
+        st.code(anim_code)
+
+    # Flash each block when its slider-driven code actually changes.
+    flash_on_change("code_params", params_code)
+    flash_on_change("code_anim", anim_code)
 
 
 class Animation:
