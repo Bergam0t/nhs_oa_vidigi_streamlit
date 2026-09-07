@@ -155,6 +155,7 @@ def flash_on_change(container_key: str, code_text: str) -> None:
         unsafe_allow_javascript=True,
     )
 
+
 st.html(
     """
     <style>
@@ -247,7 +248,6 @@ with st.sidebar:
         value=1,
         min_value=1,
         max_value=10,
-        persist_state="session",
         key="time_interval_input",
     )
     gap_between_entities_slider = st.slider(
@@ -255,7 +255,6 @@ with st.sidebar:
         value=10,
         min_value=1,
         max_value=100,
-        persist_state="session",
         key="gap_between_entities_input",
     )
     gap_between_queue_rows_slider = st.slider(
@@ -263,7 +262,6 @@ with st.sidebar:
         value=40,
         min_value=1,
         max_value=100,
-        persist_state="session",
         key="gap_between_queue_rows_input",
     )
     gap_between_resources_slider = st.slider(
@@ -271,7 +269,6 @@ with st.sidebar:
         value=10,
         min_value=1,
         max_value=100,
-        persist_state="session",
         key="gap_between_resources_input",
     )
     entity_icon_size_slider = st.slider(
@@ -279,7 +276,6 @@ with st.sidebar:
         value=20,
         min_value=1,
         max_value=100,
-        persist_state="session",
         key="entity_icon_size_input",
     )
     wrap_queues_at = st.slider(
@@ -287,7 +283,6 @@ with st.sidebar:
         value=10,
         min_value=1,
         max_value=30,
-        persist_state="session",
         key="wrap_queues_input",
     )
 
@@ -296,7 +291,6 @@ with st.sidebar:
         value=10,
         min_value=0,
         max_value=100,
-        persist_state="session",
         key="step_snapshot_max_input",
         help="Best as a multiple of 'Wrap queues at!'",
     )
@@ -309,7 +303,6 @@ with st.sidebar:
         value=2.0,
         min_value=0.1,
         max_value=30.0,
-        persist_state="session",
         key="iat_input",
         step=0.1,
     )
@@ -318,7 +311,6 @@ with st.sidebar:
         value=1,
         min_value=1,
         max_value=10,
-        persist_state="session",
         key="num_recep_input",
     )
     num_nurses_slider = st.slider(
@@ -326,7 +318,6 @@ with st.sidebar:
         value=1,
         min_value=1,
         max_value=10,
-        persist_state="session",
         key="num_nurses_input",
     )
 
@@ -335,7 +326,6 @@ with st.sidebar:
         value=1,
         min_value=1,
         max_value=10,
-        persist_state="session",
         key="num_specialists_input",
     )
 
@@ -364,7 +354,6 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=0,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             arrival_y = st.number_input(
                 "y",
@@ -372,13 +361,11 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=850,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             arrival_label = st.text_input(
                 "Label",
                 key="arrival_label_input",
                 value="Entrance",
-                persist_state="session",
             )
         with colb, st.container(border=True):
             st.markdown("`receptionist_wait_begins`")
@@ -388,7 +375,6 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=200,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             receptionist_wait_y = st.number_input(
                 "y",
@@ -396,13 +382,11 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=800,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             receptionist_wait_label = st.text_input(
                 "Label",
                 key="receptionist_label_input",
                 value="Waiting for Receptionist",
-                persist_state="session",
             )
         with colc, st.container(border=True):
             st.markdown("`being_seen_by_receptionist`")
@@ -412,7 +396,6 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=200,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             receptionist_seen_y = st.number_input(
                 "y",
@@ -420,13 +403,11 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=700,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             receptionist_seen_label = st.text_input(
                 "Label",
                 key="receptionist_seen_input",
                 value="Being Seen by Receptionist",
-                persist_state="session",
             )
         with cold, st.container(border=True):
             st.markdown("`nurse_wait_begins`")
@@ -436,7 +417,6 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=200,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             nurse_wait_y = st.number_input(
                 "y",
@@ -444,13 +424,11 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=550,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             nurse_wait_label = st.text_input(
                 "Label",
                 key="nurse_wait_label_input",
                 value="Waiting for Nurse",
-                persist_state="session",
             )
 
         cole, colf, colg, colh = st.columns(4)
@@ -463,7 +441,6 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=200,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             nurse_seen_y = st.number_input(
                 "y",
@@ -471,13 +448,11 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=450,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             nurse_seen_label = st.text_input(
                 "Label",
                 key="nurse_seen_label_input",
                 value="Being Seen By Nurse",
-                persist_state="session",
             )
         with colf, st.container(border=True):
             st.markdown("`specialist_wait_begins`")
@@ -487,7 +462,6 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=75,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             specialist_wait_y = st.number_input(
                 "y",
@@ -495,13 +469,11 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=300,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             specialist_wait_label = st.text_input(
                 "Label",
                 key="specialist_wait_label_input",
                 value="Waiting for Specialist",
-                persist_state="session",
             )
         with colg, st.container(border=True):
             st.markdown("`being_seen_by_specialist`")
@@ -511,7 +483,6 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=75,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             specialist_seen_y = st.number_input(
                 "y",
@@ -519,13 +490,11 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=200,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             specialist_seen_label = st.text_input(
                 "Label",
                 key="specialist_seen_label_input",
                 value="Being Seen By Specialist",
-                persist_state="session",
             )
         with colh, st.container(border=True):
             st.markdown("`depart`")
@@ -535,7 +504,6 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=200,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             depart_y = st.number_input(
                 "y",
@@ -543,13 +511,11 @@ Use the sliders in the sidebar to set the simulation parameters (which feed your
                 value=50,
                 min_value=0,
                 max_value=1000,
-                persist_state="session",
             )
             depart_label = st.text_input(
                 "Label",
                 key="depart_label_input",
                 value="Exit",
-                persist_state="session",
             )
 
         event_position_df_generated = f"""
