@@ -1,6 +1,7 @@
 vidigi<2.0.0
 simpy
-sim_tools
+sim-tools
 streamlit
-streamlit-dnd
+# streamlit-dnd is vendored in ./streamlit_dnd (its PyPI wheel pins
+# streamlit>=1.58, which breaks the stlite build). No pip install needed.
 ipykernel

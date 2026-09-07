@@ -2,9 +2,6 @@ import streamlit as st
 
 st.set_page_config(page_title="Vidigi Animation Playground", layout="wide")
 
-# ---- Common chrome for every page ----
-# The banner lives in static/banner.png and is served at /app/static/banner.png
-# (see .streamlit/config.toml -> server.enableStaticServing).
 st.html(
     """
     <style>
