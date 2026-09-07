@@ -5,7 +5,157 @@ from model import Param, Model  # , Trial
 
 st.set_page_config(layout="wide")
 
-st.subheader("Set Event Positions")
+st.title("Animation Playground")
+
+st.write(
+    "Let's now generate the animation. This page gives you a chance to try out a range of key vidigi parameters, interactively building up the code for an animation."
+)
+
+st.subheader("Set Simulation and Animation Parameters")
+
+st.caption("""
+Use the sliders in the sidebar to adjust the simulation parameters (which will affect your `Param` class) and the animation parameters (which will affect your `Animation` class). See how the code below updates as you make your changes.
+""")
+
+with st.sidebar:
+    st.markdown("**Animation Parameters**")
+    time_interval_slider = st.slider(
+        "Time between snapshots",
+        value=1,
+        min_value=1,
+        max_value=10,
+        persist_state="session",
+        key="time_interval_input",
+    )
+    gap_between_entities_slider = st.slider(
+        "Gap between entities",
+        value=10,
+        min_value=1,
+        max_value=100,
+        persist_state="session",
+        key="gap_between_entities_input",
+    )
+    gap_between_queue_rows_slider = st.slider(
+        "Gap between queue rows",
+        value=40,
+        min_value=1,
+        max_value=100,
+        persist_state="session",
+        key="gap_between_queue_rows_input",
+    )
+    gap_between_resources_slider = st.slider(
+        "Gap between resources",
+        value=10,
+        min_value=1,
+        max_value=100,
+        persist_state="session",
+        key="gap_between_resources_input",
+    )
+    entity_icon_size_slider = st.slider(
+        "Entity Icon Size",
+        value=20,
+        min_value=1,
+        max_value=100,
+        persist_state="session",
+        key="entity_icon_size_input",
+    )
+    wrap_queues_at = st.slider(
+        "Wrap queues at",
+        value=10,
+        min_value=1,
+        max_value=30,
+        persist_state="session",
+        key="wrap_queues_input",
+    )
+
+    maximum_queue = st.slider(
+        "Maximum Queue Displayed",
+        value=10,
+        min_value=0,
+        max_value=100,
+        persist_state="session",
+        key="step_snapshot_max_input",
+        help="Best as a multiple of 'Wrap queues at!'",
+    )
+
+    st.divider()
+
+    st.markdown("**Simulation Parameters**")
+    iat_slider = st.slider(
+        "Interarrival Time (mins)",
+        value=2.0,
+        min_value=0.1,
+        max_value=30.0,
+        persist_state="session",
+        key="iat_input",
+        step=0.1,
+    )
+    num_recep_slider = st.slider(
+        "Number of Receptionists",
+        value=1,
+        min_value=1,
+        max_value=10,
+        persist_state="session",
+        key="num_recep_input",
+    )
+    num_nurses_slider = st.slider(
+        "Number of Nurses",
+        value=1,
+        min_value=1,
+        max_value=10,
+        persist_state="session",
+        key="num_nurses_input",
+    )
+
+    num_specialists_slider = st.slider(
+        "Number of Specialists",
+        value=1,
+        min_value=1,
+        max_value=10,
+        persist_state="session",
+        key="num_specialists_input",
+    )
+
+
+col_params, col_anim = st.columns([0.35, 0.65])
+
+with col_params:
+    st.code(f"""
+what_if_params = Param(
+    num_nurses={num_nurses_slider},
+    num_receptionists={num_recep_slider},
+    num_specialists={num_specialists_slider},
+    mean_patient_inter={iat_slider},
+    mean_nurse_consult_time=10,
+    sd_nurse_consult_time=4,
+)
+""")
+
+with col_anim:
+    st.code(f"""
+class Animation:
+    def __init__(self, event_log, params):
+        self.event_log = event_log
+        self.params = params
+        self.layout = create_event_position_df(...)
+
+    def build_animation(self):
+        animate_activity_log(
+            event_log=self.event_log, scenario=self.params,
+            event_position_df=self.layout, plotly_height=500,
+            every_x_time_units={time_interval_slider},
+            entity_icon_size={entity_icon_size_slider}, gap_between_entities={gap_between_entities_slider},
+             wrap_queues_at={wrap_queues_at}, step_snapshot_max={maximum_queue},
+            gap_between_resources={gap_between_resources_slider}, gap_between_queue_rows={gap_between_queue_rows_slider},
+        )
+""")
+
+
+st.subheader("ADVANCED: Adjust Event Positions")
+
+st.caption(
+    "Want to try changing where each event appears on the screen? You can make those changes here."
+)
 
 with st.expander("Click here to change the Event Positioning Dataframe"):
     cola, colb, colc, cold = st.columns(4)
@@ -240,104 +390,6 @@ create_event_position_df(
     st.code(event_position_df_generated)
 
 
-with st.sidebar:
-    st.markdown("**Animation Parameters**")
-    time_interval_slider = st.slider(
-        "Time between snapshots",
-        value=1,
-        min_value=1,
-        max_value=10,
-        persist_state="session",
-        key="time_interval_input",
-    )
-    gap_between_entities_slider = st.slider(
-        "Gap between entities",
-        value=10,
-        min_value=1,
-        max_value=100,
-        persist_state="session",
-        key="gap_between_entities_input",
-    )
-    gap_between_queue_rows_slider = st.slider(
-        "Gap between queue rows",
-        value=40,
-        min_value=1,
-        max_value=100,
-        persist_state="session",
-        key="gap_between_queue_rows_input",
-    )
-    gap_between_resources_slider = st.slider(
-        "Gap between resources",
-        value=10,
-        min_value=1,
-        max_value=100,
-        persist_state="session",
-        key="gap_between_resources_input",
-    )
-    entity_icon_size_slider = st.slider(
-        "Entity Icon Size",
-        value=20,
-        min_value=1,
-        max_value=100,
-        persist_state="session",
-        key="entity_icon_size_input",
-    )
-    wrap_queues_at = st.slider(
-        "Wrap queues at",
-        value=10,
-        min_value=1,
-        max_value=30,
-        persist_state="session",
-        key="wrap_queues_input",
-    )
-
-    maximum_queue = st.slider(
-        "Maximum Queue Displayed",
-        value=10,
-        min_value=0,
-        max_value=100,
-        persist_state="session",
-        key="step_snapshot_max_input",
-        help="Best as a multiple of 'Wrap queues at!'",
-    )
-
-    st.markdown("**Simulation Parameters**")
-    iat_slider = st.slider(
-        "Interarrival Time (mins)",
-        value=2.0,
-        min_value=0.1,
-        max_value=30.0,
-        persist_state="session",
-        key="iat_input",
-        step=0.1,
-    )
-    num_recep_slider = st.slider(
-        "Number of Receptionists",
-        value=1,
-        min_value=1,
-        max_value=10,
-        persist_state="session",
-        key="num_recep_input",
-    )
-    num_nurses_slider = st.slider(
-        "Number of Nurses",
-        value=1,
-        min_value=1,
-        max_value=10,
-        persist_state="session",
-        key="num_nurses_input",
-    )
-
-    num_specialists_slider = st.slider(
-        "Number of Specialists",
-        value=1,
-        min_value=1,
-        max_value=10,
-        persist_state="session",
-        key="num_specialists_input",
-    )
-
-
 class Animation:
     def __init__(self, event_log, params):
         self.event_log = event_log
@@ -412,37 +464,8 @@ class Animation:
         )
 
 
-col_params, col_anim = st.columns([0.35, 0.65])
-
-with col_params:
-    st.code(f"""
-what_if_params = Param(
-    num_nurses={num_nurses_slider},
-    num_receptionists={num_recep_slider},
-    num_specialists={num_specialists_slider},
-    mean_patient_inter={iat_slider},
-    mean_nurse_consult_time=10,
-    sd_nurse_consult_time=4,
-)
-""")
-
-with col_anim:
-    st.code(f"""
-class Animation:
-    def __init__(self, event_log, params):
-        self.event_log = event_log
-        self.params = params
-        self.layout = create_event_position_df(...)
-
-    def build_animation(self):
-        animate_activity_log(
-            event_log=self.event_log, scenario=self.params,
-            event_position_df=self.layout, plotly_height=500,
-            every_x_time_units={time_interval_slider},
-            entity_icon_size={entity_icon_size_slider}, gap_between_entities={gap_between_entities_slider},
-             wrap_queues_at={wrap_queues_at}, step_snapshot_max={maximum_queue},
-            gap_between_resources={gap_between_resources_slider}, gap_between_queue_rows={gap_between_queue_rows_slider},
-        )
+st.write("""
+Finished tweaking the settings? Click the "Animate Simulation" button below to see how the changes you've made affect the final animation. You can rerun this as many times as you like!
 """)
 
 
