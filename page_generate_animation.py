@@ -1,4 +1,6 @@
+import difflib
 import hashlib
+import json
 
 import streamlit as st
 from vidigi.utils import create_event_position_df, EventPosition
@@ -7,33 +9,115 @@ from model import Param, Model  # , Trial
 
 # Page config and the top-banner styling live in streamlit_app.py (the entrypoint).
 
+_TOKEN_CHARS = set("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_.")
+
+
+def _changed_spans(prev: str, curr: str) -> list[dict]:
+    """Character ranges in `curr` that differ from `prev`, each widened out to
+    the surrounding ``name=value`` token so the highlight reads cleanly."""
+    raw: list[list[int]] = []
+    for tag, _i1, _i2, j1, j2 in difflib.SequenceMatcher(
+        None, prev, curr, autojunk=False
+    ).get_opcodes():
+        if tag in ("replace", "insert") and j2 > j1:
+            raw.append([j1, j2])
+
+    widened: list[list[int]] = []
+    for start, end in raw:
+        while start > 0 and curr[start - 1] in _TOKEN_CHARS:
+            start -= 1
+        if start > 0 and curr[start - 1] == "=":  # pull in the `name=` prefix
+            start -= 1
+            while start > 0 and (curr[start - 1].isalnum() or curr[start - 1] == "_"):
+                start -= 1
+        while end < len(curr) and curr[end] in _TOKEN_CHARS:
+            end += 1
+        widened.append([start, end])
+
+    merged: list[list[int]] = []
+    for start, end in sorted(widened):
+        if merged and start <= merged[-1][1]:
+            merged[-1][1] = max(merged[-1][1], end)
+        else:
+            merged.append([start, end])
+
+    return [{"start": s, "end": e, "text": curr[s:e]} for s, e in merged]
+
 
 def flash_on_change(container_key: str, code_text: str) -> None:
-    """Briefly highlight the container ``.st-key-<container_key>`` whenever
-    ``code_text`` differs from the previous run.
+    """Highlight (yellow-marker style) the exact tokens in the code block
+    ``.st-key-<container_key>`` that changed since the previous run.
 
-    Slider changes trigger a full rerun, so the code blocks re-render every
-    time. The trick: this ships a ``<script>`` whose text only changes when the
-    code changes, so Streamlit re-executes it (and replays the CSS flash)
-    exactly on those reruns -- never on an unrelated rerun, and never on the
-    first render.
+    Slider changes trigger a full rerun, so the code re-renders every time.
+    We diff against the previous text (kept in session state), hand the changed
+    character ranges to a tiny script, and it wraps just those runs in
+    ``<mark class="tok-flash">``. The script's body only changes when the code
+    changes, so Streamlit re-executes it exactly on those reruns -- and never
+    on the first render.
     """
-    nonce = hashlib.md5(code_text.encode("utf-8")).hexdigest()[:8]
+    state_key = f"_flash_prev_{container_key}"
+    prev = st.session_state.get(state_key)
+    st.session_state[state_key] = code_text
+
+    spans = _changed_spans(prev, code_text) if prev not in (None, code_text) else []
+    payload = json.dumps(
+        {
+            "key": container_key,
+            "nonce": hashlib.md5(code_text.encode("utf-8")).hexdigest()[:8],
+            "spans": spans,
+        }
+    )
+
     st.html(
         f"""
         <script>
         (function () {{
-            const KEY = "{container_key}";
-            const NONCE = "{nonce}";  /* changes only when this code changes */
-            window.__codeFlash = window.__codeFlash || {{}};
-            const prev = window.__codeFlash[KEY];
-            window.__codeFlash[KEY] = NONCE;
-            if (prev === undefined || prev === NONCE) return;  /* first sight / no change */
-            const el = document.querySelector(".st-key-" + KEY);
-            if (!el) return;
-            el.classList.remove("code-flash");
-            void el.offsetWidth;  /* reflow so the animation can restart */
-            el.classList.add("code-flash");
+            const DATA = {payload};
+            const scope = document.querySelector(".st-key-" + DATA.key + " [data-testid='stCode']");
+            if (!scope) return;
+            const root = scope.querySelector("code") || scope;
+
+            // clear any previous highlights
+            root.querySelectorAll("mark.tok-flash").forEach(function (m) {{
+                m.replaceWith(document.createTextNode(m.textContent));
+            }});
+            root.normalize();
+            if (!DATA.spans.length) return;
+
+            const full = root.textContent;
+            DATA.spans.forEach(function (span) {{
+                let start = span.start, end = span.end;
+                if (full.slice(start, end) !== span.text) {{
+                    const found = full.indexOf(span.text);   // fall back to a text search
+                    if (found < 0) return;
+                    start = found;
+                    end = found + span.text.length;
+                }}
+                wrapRange(root, start, end);
+            }});
+
+            function wrapRange(el, start, end) {{
+                const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+                let pos = 0, node;
+                const hits = [];
+                while ((node = walker.nextNode())) {{
+                    const nStart = pos, nEnd = pos + node.nodeValue.length;
+                    if (nEnd > start && nStart < end) {{
+                        hits.push([node, Math.max(start, nStart) - nStart, Math.min(end, nEnd) - nStart]);
+                    }}
+                    pos = nEnd;
+                    if (pos >= end) break;
+                }}
+                for (let i = hits.length - 1; i >= 0; i--) {{
+                    const parts = hits[i];
+                    const r = document.createRange();
+                    r.setStart(parts[0], parts[1]);
+                    r.setEnd(parts[0], parts[2]);
+                    const mark = document.createElement("mark");
+                    mark.className = "tok-flash";
+                    try {{ r.surroundContents(mark); }} catch (e) {{}}
+                }}
+            }}
         }})();
         </script>
         """,
@@ -101,15 +185,19 @@ st.html(
         padding-bottom: 0.25rem;
     }
 
-    /* ---- Flash a code block when the slider-driven code changes ---- */
-    @keyframes codeFlash {
-        from { box-shadow: 0 0 0 3px rgba(190, 24, 93, 0.55); }
-        to   { box-shadow: 0 0 0 3px rgba(190, 24, 93, 0); }
+    /* ---- Highlighter flash on the exact code that a slider just changed ---- */
+    .st-key-code_params mark.tok-flash,
+    .st-key-code_anim mark.tok-flash {
+        color: inherit;
+        border-radius: 3px;
+        padding: 0 1px;
+        box-decoration-break: clone;
+        -webkit-box-decoration-break: clone;
+        animation: tokFlash 1.6s ease-out forwards;
     }
-    .st-key-code_params.code-flash,
-    .st-key-code_anim.code-flash {
-        animation: codeFlash 0.8s ease-out;
-        border-radius: 0.5rem;
+    @keyframes tokFlash {
+        0%, 55% { background-color: #fde047; }
+        100%    { background-color: rgba(253, 224, 71, 0); }
     }
 
     /* The flash helper and the style block above ship as empty html elements. */
@@ -501,6 +589,11 @@ class Animation:
             gap_between_resources={gap_between_resources_slider}, gap_between_queue_rows={gap_between_queue_rows_slider},
         )
 """
+
+    # Strip the leading/trailing newline so the rendered text (and therefore
+    # the highlight offsets) line up exactly with these strings.
+    params_code = params_code.strip("\n")
+    anim_code = anim_code.strip("\n")
 
     col_params, col_anim = st.columns([0.35, 0.65])
 
