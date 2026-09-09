@@ -8,18 +8,30 @@ with open("styles.css") as css:
 
 # Page config and the top-banner styling live in streamlit_app.py (the entrypoint).
 
-st.title("Vidigi Logging Code")
 
-st.caption("""
+col_intro_l, col_intro_r = st.columns(2)
+
+col_intro_l.title("Vidigi Logging Code")
+
+col_intro_l.caption("""
 Let's add the logging steps into our SimPy model.
 
-However, we've simplified it down to just a single-step model where patients wait for a nurse, see them, then leave.
-
-- First, reorder the code snippets in the left-hand column so they appear in the correct order.
-- Then drag and drop the code from the right-hand column to the correct position in the left column.
-
-When you are done, check your answer by clicking the 'Submit' button.
+We've simplified it down to just a single-step model where patients wait for a nurse, see them, then leave.
 """)
+
+with col_intro_r:
+    st.caption("")
+
+    with st.container(border=True):
+        st.caption("""
+        ##### Instructions
+        - First, reorder the code snippets in the left-hand column so they appear in the correct order.
+        - Then drag and drop the code from the right-hand column to the correct position in the left column.
+
+        When you are done, check your answer by clicking the 'Submit' button.
+        """)
+
+st.divider()
 
 # ---------------------------------------------------------------------------
 # The snippets.

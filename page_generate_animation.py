@@ -234,15 +234,32 @@ st.html(
     [data-testid="stHtml"] {
         display: none;
     }
+
+    h1 {
+        font-size: 1.75rem !important;
+    }
+
+    p {
+        font-size: 0.8rem !important;
+    }
+
+    code {
+        font-size: 0.775rem !important;
+    }
+
     </style>
     """
 )
 
-st.title("Animation Playground")
+col1_intro, col2_intro = st.columns(2)
 
-st.write(
-    "Let's now generate the animation. This page gives you a chance to try out a range of key vidigi parameters, interactively building up the code for an animation."
-)
+col1_intro.title("Animation Playground")
+
+with col2_intro:
+    st.write("")
+    st.write(
+        "This page gives you a chance to try out a range of key vidigi parameters, interactively building up the code for an animation."
+    )
 
 with st.sidebar:
     st.markdown("**Animation Parameters**")
@@ -308,6 +325,7 @@ with st.sidebar:
         max_value=30.0,
         key="iat_input",
         step=0.1,
+        help="Remember that a lower inter-arrival time means patients arrive more frequently and there will be more patients per day.",
     )
     num_recep_slider = st.slider(
         "Number of Receptionists",
@@ -336,17 +354,14 @@ with st.sidebar:
 tab_build, tab_run = st.tabs(["Build your animation", "Run the animation"])
 
 with tab_build:
-    st.caption("""
+    st.write("""
 Use the sliders in the sidebar to set the simulation parameters (which feed your `Param` class) and the animation parameters (which feed your `Animation` class). Optionally adjust where each event sits on screen below. The assembled code updates as you make your changes.
 """)
 
     advanced = st.container(key="advanced_section")
-    advanced.subheader("ADVANCED: Adjust Event Positions")
-    advanced.caption(
-        "Want to try changing where each event appears on the screen? You can make those changes here."
-    )
-
-    with advanced.expander("Click here to change the Event Positioning Dataframe"):
+    with advanced.expander(
+        "**ADVANCED: Adjust Event Positions**\n\nWant to try changing where each event appears on the screen? Click here to make those changes."
+    ):
         cola, colb, colc, cold = st.columns(4)
 
         with cola, st.container(border=True):
@@ -554,7 +569,7 @@ create_event_position_df(
 
         st.code(event_position_df_generated)
 
-    st.subheader("Your code so far")
+    st.markdown("##### Your code so far")
 
     params_code = f"""
 what_if_params = Param(
