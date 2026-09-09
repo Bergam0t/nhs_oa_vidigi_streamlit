@@ -25,7 +25,7 @@ with col_intro_r:
     with st.container(border=True):
         st.caption("""
         ##### Instructions
-        - First, reorder the code snippets in the left-hand column so they appear in the correct order.
+        - First, reorder the code snippets in the left-hand column so they appear in the correct order. The first code snippet is locked in place.
         - Then drag and drop the code from the right-hand column to the correct position in the left column.
 
         When you are done, check your answer by clicking the 'Submit' button.
